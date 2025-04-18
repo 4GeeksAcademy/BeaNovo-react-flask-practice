@@ -18,7 +18,7 @@ import ProtectedRoute from "./component/ProtectedRoute"; // Asegúrate que la ru
 const Layout = () => {
     const basename = process.env.BASENAME || "";
 
-    if(!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL/ >;
+    if (!process.env.BACKEND_URL || process.env.BACKEND_URL == "") return <BackendURL />;
 
     return (
         <div>
@@ -31,13 +31,9 @@ const Layout = () => {
                         <Route element={<Signup />} path="/signup" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Single />} path="/single/:theid" />
-                        
-                        {/* Rutas protegidas */}
                         <Route element={<ProtectedRoute />}>
-                            <Route path="/profile" element={<Profile />} />
-                            {/* <Route path="/private-data" element={<PrivateData />} /> */}
+                        <Route path="/profile" element={<Profile />} />
                         </Route>
-                        
                         <Route element={<h1>Not found!</h1>} path="*" />
                     </Routes>
                     <Footer />

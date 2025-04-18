@@ -39,13 +39,14 @@ const getState = ({ getStore, getActions, setStore }) => {
 				  
 				  if (response.status === 201) {
 					const data = await response.json();
-					// Tu backend no devuelve token en signup, hacemos login automático
+					
+				
 					const loginSuccess = await getActions().login(email, password);
 					return loginSuccess;
 				  } else {
 					const errorData = await response.json();
 					console.error("Error en registro:", errorData.msg);
-					alert(errorData.msg || "Error en registro"); // Muestra alerta con el mensaje del backend
+					alert(errorData.msg || "Error en registro"); 
 					return false;
 				  }
 				} catch (error) {
@@ -77,13 +78,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 					localStorage.setItem("token", data.token);
 					setStore({ 
 					  logged: true,
-					  user: { id: data.user_id, email: data.email }, // Ajusta según lo que devuelve tu backend
+					  user: { id: data.user_id, email: data.email }, 
 					  token: data.token,
 					  auth: true
 					});
 					return true;
 				  }
-				  return false; // Indica fallo
+				  return false; 
 				} catch (error) {
 				  console.error(error);
 				  return false;
@@ -122,7 +123,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 					setStore({ 
 					  auth: data.valid,
 					  logged: data.valid,
-					  user: data.user, // Usa los datos del usuario que devuelve tu backend
+					  user: data.user, 
 					  token: token
 					});
 					return data.valid;
@@ -134,7 +135,7 @@ const getState = ({ getStore, getActions, setStore }) => {
 				}
 			  },
 			logout: () => {
-				//borrar el token del localStorage
+				
 		
 					localStorage.removeItem("token");
 					setStore({ 

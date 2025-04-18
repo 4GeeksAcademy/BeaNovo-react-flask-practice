@@ -1,29 +1,37 @@
-import React, { useContext, useEffect} from "react";
+import React, { useContext } from "react";
 import { Context } from "../store/appContext";
 import { Link, useNavigate } from "react-router-dom";
 
 export const Navbar = () => {
-	const { store, actions } = useContext(Context)
-	const handleClick = () => {
-		actions.logout()
-	}
-	
-	return (
-		<nav className="navbar navbar-light bg-light">
-			<div className="container">
-				<Link to="/">
-					<span className="navbar-brand mb-0 h1">Home</span>
-				</Link>
-				<div>
-				<Link to="/">
-                    <button className="btn btn-primary" onClick={handleClick}>Logout</button>
-                    </Link>
-				{/* <div className="ml-auto">
-					{store.logged ? <Link to="/">
-						<button className="btn btn-primary" onClick={handleClick}>logout</button> */}
-					{/* </Link> : null} */}
-				</div>
-			</div>
-		</nav>
-	);
+    const { store, actions } = useContext(Context);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        actions.logout();
+        navigate("/"); 
+    };
+
+    return (
+        <nav className="navbar navbar-light bg-light px-3">
+            <div className="container-fluid">
+      
+                <button 
+                    className="btn btn-outline-primary me-2" 
+                    onClick={() => navigate("/")}
+                >
+                    <i className="fas fa-home me-2"></i> Home
+                </button>
+                
+                
+                {store.logged && (
+                    <button 
+                        className="btn btn-danger ms-auto"
+                        onClick={handleLogout}
+                    >
+                        <i className="fas fa-sign-out-alt me-2"></i> Cerrar sesión
+                    </button>
+                )}
+            </div>
+        </nav>
+    );
 };

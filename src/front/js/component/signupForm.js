@@ -14,7 +14,7 @@ export const SignupForm = () => {
         if (success) {
           navigate("/profile");
         }
-        // El mensaje de error ya se maneja en la acción
+      
       };
 
     return (
