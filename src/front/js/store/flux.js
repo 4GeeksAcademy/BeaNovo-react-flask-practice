@@ -1,8 +1,12 @@
+// import { jwtDecode } from "jwt-decode";
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
 			message: null,
 			auth: false,
+			user: null,
+			logged: false,
+			token:null,
 			demo: [
 				{
 					title: "FIRST",
@@ -18,59 +22,130 @@ const getState = ({ getStore, getActions, setStore }) => {
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
-			login: async (email, password) => {
-
-
-				const myHeaders = new Headers();
-				myHeaders.append("Content-Type", "application/json");
-
+			signup: async (email, password) => {
 				const raw = JSON.stringify({
-					"email": email,
-					"password": password
+				  email: email,
+				  password: password
 				});
-
+			  
 				const requestOptions = {
-					method: "POST",
-					headers: myHeaders,
-					body: raw,
-					redirect: "follow"
+				  method: "POST",
+				  headers: {"Content-Type": "application/json"},
+				  body: raw,
 				};
-
+			  
 				try {
-					const response = await fetch("https://potential-spork-7pvx7qxxxj9c64x-3001.app.github.dev/api/login", requestOptions);
-					const result = await response.json();
-
-					if (response.status === 200) {
-						localStorage.setItem("token", result.access_token)
-						return true
-					}
-				} catch (error) {
-					console.error(error);
+				  const response = await fetch("https://reimagined-adventure-v6p4pp7rxgwvfwvwg-3001.app.github.dev/api/signup", requestOptions);
+				  
+				  if (response.status === 201) {
+					const data = await response.json();
+					// Tu backend no devuelve token en signup, hacemos login automático
+					const loginSuccess = await getActions().login(email, password);
+					return loginSuccess;
+				  } else {
+					const errorData = await response.json();
+					console.error("Error en registro:", errorData.msg);
+					alert(errorData.msg || "Error en registro"); // Muestra alerta con el mensaje del backend
 					return false;
+				  }
+				} catch (error) {
+				  console.error("Error de red:", error);
+				  alert("Error de conexión");
+				  return false;
+				}
+			  },
+
+
+
+			login: async (email, password) => {
+				const raw = JSON.stringify({
+				  "email": email,
+				  "password": password
+				});
+			  
+				const requestOptions = {
+				  method: "POST",
+				  headers: {"Content-Type": "application/json"},
+				  body: raw,
 				};
-			},
-			getProfile: async () => {
+			  
+				try {
+				  const response = await fetch("https://reimagined-adventure-v6p4pp7rxgwvfwvwg-3001.app.github.dev/api/login", requestOptions);
+				  
+				  if (response.status === 200) {
+					const data = await response.json();
+					localStorage.setItem("token", data.token);
+					setStore({ 
+					  logged: true,
+					  user: { id: data.user_id, email: data.email }, // Ajusta según lo que devuelve tu backend
+					  token: data.token,
+					  auth: true
+					});
+					return true;
+				  }
+				  return false; // Indica fallo
+				} catch (error) {
+				  console.error(error);
+				  return false;
+				}
+			  },
+			getPrivate: async () => {
 				let token = localStorage.getItem("token")
 				try {
-					const response = await fetch("https://potential-spork-7pvx7qxxxj9c64x-3001.app.github.dev/api/profile", {
+					const response = await fetch("https://reimagined-adventure-v6p4pp7rxgwvfwvwg-3001.app.github.dev/api/login", {
 						method: "GET",
 						headers: {
 							"Authorization": `Bearer ${token}`
 						},
 					});
 					const result = await response.json();
-					console.log(result)
+					setStore({ user: result.logged_in_as })
+
 				} catch (error) {
 					console.error(error);
 				};
 			},
-			tokenVerify:()=>{
-				//crear un nuevo endpoint que se llame verificacion de token
-				//la peticion en la funcion tokenVerify del front deberia actualizar un estado auth:
-			},
-			logout:()=>{
+			verifyToken: async () => {
+				const token = localStorage.getItem("token");
+				if (!token) return false;
+			  
+				try {
+				  const response = await fetch("https://reimagined-adventure-v6p4pp7rxgwvfwvwg-3001.app.github.dev/api/verify-token", {
+					method: "GET",
+					headers: {
+					  "Authorization": `Bearer ${token}`
+					},
+				  });
+				  
+				  if (response.ok) {
+					const data = await response.json();
+					setStore({ 
+					  auth: data.valid,
+					  logged: data.valid,
+					  user: data.user, // Usa los datos del usuario que devuelve tu backend
+					  token: token
+					});
+					return data.valid;
+				  }
+				  return false;
+				} catch (error) {
+				  console.error("Error verifying token:", error);
+				  return false;
+				}
+			  },
+			logout: () => {
 				//borrar el token del localStorage
-			},
+		
+					localStorage.removeItem("token");
+					setStore({ 
+						token: null,
+						user: null,
+						auth: false,
+						logged: false
+					});
+					// navigate("/")
+				}
+				,
 			getMessage: async () => {
 				try {
 					// fetching data from the backend
